@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type LoginSate = {
   success: boolean;
@@ -45,6 +46,8 @@ export const loginAction = async (privState: LoginSate, formData: FormData) => {
       maxAge: 60 * 60 * 24,
       sameSite: "lax",
     });
+
+    redirect("/dashboard"); //server
   }
 
   console.log(result);
