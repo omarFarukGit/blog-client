@@ -7,9 +7,9 @@ export const getMe = async () => {
 
   const accessToken = cookieStore.get("accessToken")?.value;
 
-  if(!accessToken){
-      throw new Error("User Not Logdin")
-  }
+  // if(!accessToken){
+  //     throw new Error("User Not Logdin")
+  // }
 
   const res = await fetch(`${process.env.BACKEND_API_URL}/api/users/me`, {
     headers: {
