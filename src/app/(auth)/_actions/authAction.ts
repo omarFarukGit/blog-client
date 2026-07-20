@@ -33,10 +33,12 @@ export const loginAction = async (privState: LoginSate, formData: FormData) => {
 
   const result = await res.json();
 
+  console.log(result, "result");
+
   if (result.success) {
     const cookiStore = await cookies();
 
-    cookiStore.set("accessToken", result.accessToken, {
+    cookiStore.set("accessToken", result.data.accessToken, {
       httpOnly: true,
       maxAge: 60 * 60 * 24,
       sameSite: "lax",
