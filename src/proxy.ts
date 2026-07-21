@@ -34,6 +34,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  console.log(userRole, "userrole");
+
   const isPublic = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
@@ -41,6 +43,16 @@ export async function proxy(request: NextRequest) {
   //auhenticated pages protection
   if (!accessToken && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  //   Authorizing Role Based Protected Routes In Proxy
+
+  if (pathname.startsWith("/dashboard") && userRole !== "USER") {
+    return NextResponse.redirect(new URL("/", request.url));
+  } else if (pathname.startsWith("/admin-dashboard") && userRole !== "ADMIN") {
+    return NextResponse.redirect(new URL("/", request.url));
+  } else if (pathname.startsWith("/author-dashboard") && userRole !== "AUTHOR") {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
