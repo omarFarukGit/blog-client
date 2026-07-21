@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 const AUTH_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/", "/news", "/login", "/register"];
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -33,8 +34,16 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  console.log("proxy");
-  return NextResponse.redirect(new URL("/", request.url));
+  const isPublic = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/"),
+  );
+
+  //auhenticated pages protection
+  if (!accessToken && !isPublic) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
