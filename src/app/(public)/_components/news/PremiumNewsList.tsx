@@ -8,8 +8,8 @@ export async function PremiumNewsList({
 }: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const query = await searchParams;
-  const result = await getPremiumNews();
+  const search = await searchParams;
+  const result = await getPremiumNews({search});
 
   if (!result.success || !result.data?.length) {
     return (
