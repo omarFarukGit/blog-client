@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { jwtUtils } from "./utils/jwt";
+import { geNewAccessToken } from "./services/refreshToken";
 
 const AUTH_ROUTES = ["/login", "/register"];
 const PUBLIC_ROUTES = ["/", "/news", "/login", "/register"];
@@ -14,22 +15,49 @@ export async function proxy(request: NextRequest) {
   // const accessToken=cookieStore.get('accessToken')?.value
 
   // 2nd way get access token
-  const accessToken = request.cookies.get("accessToken")?.value;
+  let accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("accessToken")?.value;
 
-  const decodedToken = accessToken
+  let decodedAccessToken = accessToken
     ? jwtUtils.verifiedToken(
         accessToken,
         process.env.JWT_ACCESS_SECRET as string,
       )
     : null;
+  const decodedRefreshToken = refreshToken
+    ? jwtUtils.verifiedToken(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string,
+      )
+    : null;
+
+  if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
+    // access token has exreid but resh token server access token
+    const result = await geNewAccessToken();
+
+    if (result.success) {
+      const newAccessToken = result.data.accessToken;
+
+      cookieStore.set("accessToken", newAccessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      accessToken = newAccessToken;
+      decodedAccessToken = accessToken
+        ? jwtUtils.verifiedToken(
+            accessToken,
+            process.env.JWT_ACCESS_SECRET as string,
+          )
+        : null;
+    }
+  }
 
   let userRole = null;
-  if (!decodedToken?.success) {
+  if (!decodedAccessToken?.success) {
     cookieStore.delete("accessToken");
-    return NextResponse.redirect(new URL("/login", request.url));
   }
-  if (decodedToken?.success && decodedToken.data) {
-    userRole = (decodedToken.data as JwtPayload).role;
+  if (decodedAccessToken?.success && decodedAccessToken.data) {
+    userRole = (decodedAccessToken.data as JwtPayload).role;
   }
 
   //user is logged in
