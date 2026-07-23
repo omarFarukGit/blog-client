@@ -1,3 +1,4 @@
+'use server'
 import { cookies } from "next/headers";
 
 export const getPremiumNews = async () => {
@@ -8,7 +9,7 @@ export const getPremiumNews = async () => {
     headers: {
       Authorization: `${accessToken}`,
     },
-    
+
     cache: "force-cache",
     next: {
       revalidate: 60 * 60 * 24,
