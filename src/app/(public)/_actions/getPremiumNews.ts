@@ -2,11 +2,15 @@
 import { cookies } from "next/headers";
 
 export const getPremiumNews = async ({
-  search,
+  query,
 }: {
-  search?: { [key: string]: string | string[] | undefined };
+  query?: { [key: string]: string | string[] | undefined };
 }) => {
-  const searchTerm = `${search?.searchTerm ? `?searchTerm=${search.searchTerm}` : ""}`;
+  const searchTerm = `${query?.searchTerm ? `?searchTerm=${query.searchTerm}` : ""}`;
+  // const params = new URLSearchParams();
+  // if (query && query.searchTerm) {
+  //   params.set("searchTerm", query.searchTerm as string);
+  // }
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
 
@@ -17,16 +21,16 @@ export const getPremiumNews = async ({
         Authorization: `${accessToken}`,
       },
 
-      cache: "force-cache",
-      next: {
-        revalidate: 60 * 60 * 24,
-        tags: ["premium-posts"],
-      },
+      // cache: "force-cache",
+      // next: {
+      //   revalidate: 60 * 60 * 24,
+      //   tags: ["premium-posts"],
+      // },
     },
   );
 
   const result = await res.json();
-
+  console.log(result, "pre");
 
   return result;
 };
